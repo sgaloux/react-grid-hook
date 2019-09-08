@@ -19,6 +19,16 @@ describe("Client mode", () => {
     expect(result.current.pageSize).toBe(5);
     expect(result.current.nbPages).toBe(20);
     expect(result.current.pageNumbers.length).toBe(20);
+
+    act(() => result.current.goToNextPage());
+
+    expect(result.current.page[0]).toBe(TestData[5]);
+
+    act(() => result.current.goToPreviousPage());
+    expect(result.current.page[0]).toBe(TestData[0]);
+
+    act(() => result.current.goToPage(5));
+    expect(result.current.page[0]).toBe(TestData[20]);
   });
 
   it("Should sort data accordingly", () => {
