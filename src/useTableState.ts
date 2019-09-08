@@ -1,10 +1,9 @@
-import * as react from "react";
-import React from "react";
-import sortBy from "lodash/fp/sortBy";
-import { AssertionError } from "assert";
+import * as React from "react";
+import * as lodash from "lodash";
 import { IColumn } from "./interfaces/IColumn";
 import { IUseTableOptions } from "./interfaces/IUseTableOptions";
 import { SortType } from "./types/SortType";
+import { object } from "prop-types";
 
 interface IColumnInfo<T> extends IColumn<T> {
   sortInfo: SortType;
@@ -17,35 +16,6 @@ interface ISetDataOptions {
   pageIndex: number;
 }
 
-// export interface IUseTableStateReturnType<T>
-//   extends Pick<IUseTableOptions<T>, "enablePagination" | "enableFilter"> {
-//   data: T[];
-//   page: T[];
-//   pageIndex: number;
-//   pageSize: number;
-//   nbPages: number;
-//   forceTake: number;
-//   forceSkip: number;
-//   totalCount: number;
-//   sortKeys: {
-//     [key: string]: SortType;
-//   };
-//   globalFilter: string;
-//   sortKeysStrings: string[];
-//   availablePageSizes: number[];
-//   pageNumbers: number[];
-//   columns: Array<IColumnInfo<T>>;
-//   canGoNextPage: boolean;
-//   canGoPreviousPage: boolean;
-//   setPageSize: (size: number) => void;
-//   goToNextPage: () => void;
-//   goToPreviousPage: () => void;
-//   goToPage: (pageIndex: number) => void;
-//   setData: (data: T[], options?: ISetDataOptions) => void;
-//   toggleSort: (fieldName: string) => void;
-//   setGlobalFilter: (filter: string) => void;
-// }
-
 interface IUseTableState<T> extends IUseTableOptions<T> {
   pageIndex: number;
   totalCount: number;
@@ -57,7 +27,7 @@ interface IUseTableState<T> extends IUseTableOptions<T> {
 }
 
 export const useTableState = <T>(options?: Partial<IUseTableOptions<T>>) => {
-  const [tableState, setTableState] = react.useState<IUseTableState<T>>({
+  const [tableState, setTableState] = React.useState<IUseTableState<T>>({
     ...{
       data: [],
       columns: [],
@@ -105,15 +75,21 @@ export const useTableState = <T>(options?: Partial<IUseTableOptions<T>>) => {
   // COMPUTE SORT
   const sortedData = React.useMemo(() => {
     if (!serverMode) {
-      let sortedDataResults = data as any;
-      Object.keys(sortKeys)
-        .filter(k => sortKeys[k] !== "NONE")
-        .forEach(k => {
-          sortedDataResults = sortBy(sortedDataResults, sortKeys[k]);
-          if (sortKeys[k] === "DESC") {
-            sortedDataResults = sortedDataResults.reverse();
-          }
-        });
+      const sortKeyFields = Object.keys(sortKeys).filter(
+        d => sortKeys[d] !== "NONE"
+      );
+
+      const sortKeyOrderBy = sortKeyFields
+        .map(d => sortKeys[d])
+        .filter(s => s !== "NONE")
+        .map(s => (s === "ASC" ? "asc" : "desc"));
+
+      const sortedDataResults = lodash.orderBy(
+        data as any,
+        sortKeyFields,
+        sortKeyOrderBy
+      );
+
       return sortedDataResults as T[];
     } else {
       return data;
@@ -192,21 +168,28 @@ export const useTableState = <T>(options?: Partial<IUseTableOptions<T>>) => {
   );
 
   const toggleSort = React.useCallback(
-    (fieldName: string) => {
+    (fieldName: string, sortOrder?: SortType) => {
       if (!fieldName) return;
+
       const currentKeySort = sortKeys[fieldName] || "NONE";
       let nextSortKeys = { ...sortKeys };
       let nextSort: SortType = "NONE";
-      if (currentKeySort === "NONE") {
-        nextSort = "ASC";
-      } else if (currentKeySort === "ASC") {
-        nextSort = "DESC";
+      if (sortOrder !== undefined) {
+        nextSort = sortOrder;
+      } else {
+        if (currentKeySort === "NONE") {
+          nextSort = "ASC";
+        } else if (currentKeySort === "ASC") {
+          nextSort = "DESC";
+        }
       }
       if (!enableMultiSort) {
         // Reset other keys
         Object.keys(sortKeys).forEach(k => (nextSortKeys[k] = "NONE"));
       }
+
       nextSortKeys[fieldName] = nextSort;
+
       setTableState(s => ({ ...s, sortKeys: nextSortKeys }));
     },
     [enableMultiSort, setTableState, sortKeys]

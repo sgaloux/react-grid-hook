@@ -7,7 +7,8 @@
   "scripts": {
     "build": "tsc",
     "test": "jest",
-    "test:watch": "jest --watch",
+    "test:watch": "jest --watch --coverage",
+    "test:cover": "jest --coverage",
     "prepare": "npm test"
   },
   "repository": {
