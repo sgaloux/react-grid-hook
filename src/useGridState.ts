@@ -16,7 +16,7 @@ interface ISetDataOptions {
   pageIndex: number;
 }
 
-interface IUseTableState<T> extends IUseTableOptions<T> {
+interface IUsegridState<T> extends IUseTableOptions<T> {
   pageIndex: number;
   totalCount: number;
   globalFilter: string;
@@ -26,8 +26,8 @@ interface IUseTableState<T> extends IUseTableOptions<T> {
   };
 }
 
-export const useTableState = <T>(options?: Partial<IUseTableOptions<T>>) => {
-  const [tableState, setTableState] = React.useState<IUseTableState<T>>({
+export const useGridState = <T>(options?: Partial<IUseTableOptions<T>>) => {
+  const [gridState, setGridState] = React.useState<IUsegridState<T>>({
     ...{
       data: [],
       columns: [],
@@ -61,16 +61,16 @@ export const useTableState = <T>(options?: Partial<IUseTableOptions<T>>) => {
     globalFilter,
     enableFilter,
     enablePagination
-  } = tableState;
+  } = gridState;
 
   // Compute basic total count and page data
   React.useEffect(() => {
     if (!serverMode) {
-      setTableState(s => ({ ...s, totalCount: data.length }));
+      setGridState(s => ({ ...s, totalCount: data.length }));
     } else {
-      setTableState(s => ({ ...s, page: data }));
+      setGridState(s => ({ ...s, page: data }));
     }
-  }, [data, serverMode, setTableState]);
+  }, [data, serverMode, setGridState]);
 
   // COMPUTE SORT
   const sortedData = React.useMemo(() => {
@@ -104,15 +104,15 @@ export const useTableState = <T>(options?: Partial<IUseTableOptions<T>>) => {
         const startIndex = (pageIndex - 1) * pageSize;
         const endIndex = startIndex + pageSize;
         const nextpage = sortedData.slice(startIndex, endIndex);
-        setTableState(s => ({ ...s, page: nextpage, nbPages: nextnbPages }));
+        setGridState(s => ({ ...s, page: nextpage, nbPages: nextnbPages }));
       } else {
         // Set only 1 page with the size of TotalCount
-        setTableState(s => ({ ...s, page: sortedData, nbPages: 1 }));
+        setGridState(s => ({ ...s, page: sortedData, nbPages: 1 }));
       }
     } else {
-      setTableState(s => ({ ...s, page: sortedData }));
+      setGridState(s => ({ ...s, page: sortedData }));
     }
-  }, [serverMode, sortedData, pageIndex, pageSize, totalCount, setTableState]);
+  }, [serverMode, sortedData, pageIndex, pageSize, totalCount, setGridState]);
 
   const nbPages = React.useMemo(() => Math.ceil(totalCount / pageSize), [
     pageSize,
@@ -128,28 +128,28 @@ export const useTableState = <T>(options?: Partial<IUseTableOptions<T>>) => {
 
   const goToNextPage = React.useCallback(() => {
     if (canGoNextPage) {
-      setTableState(s => ({ ...s, pageIndex: s.pageIndex + 1 }));
+      setGridState(s => ({ ...s, pageIndex: s.pageIndex + 1 }));
     }
-  }, [canGoNextPage, setTableState]);
+  }, [canGoNextPage, setGridState]);
 
   const goToPreviousPage = React.useCallback(() => {
     if (canGoPreviousPage) {
-      setTableState(s => ({ ...s, pageIndex: s.pageIndex - 1 }));
+      setGridState(s => ({ ...s, pageIndex: s.pageIndex - 1 }));
     }
-  }, [canGoPreviousPage, setTableState]);
+  }, [canGoPreviousPage, setGridState]);
 
   const goToPage = React.useCallback(
     (pgIndex: number) => {
       if (pgIndex > 0 && pgIndex <= nbPages) {
-        setTableState(s => ({ ...s, pageIndex: pgIndex }));
+        setGridState(s => ({ ...s, pageIndex: pgIndex }));
       }
     },
-    [nbPages, setTableState]
+    [nbPages, setGridState]
   );
 
   const setData = React.useCallback(
     (nextData: T[], dataOptions?: ISetDataOptions) => {
-      setTableState(s => {
+      setGridState(s => {
         const nextState = { ...s };
         nextState.data = nextData;
         if (dataOptions) {
@@ -159,7 +159,7 @@ export const useTableState = <T>(options?: Partial<IUseTableOptions<T>>) => {
         return nextState;
       });
     },
-    [setTableState]
+    [setGridState]
   );
 
   const [forceTake, forceSkip] = React.useMemo(
@@ -190,23 +190,23 @@ export const useTableState = <T>(options?: Partial<IUseTableOptions<T>>) => {
 
       nextSortKeys[fieldName] = nextSort;
 
-      setTableState(s => ({ ...s, sortKeys: nextSortKeys }));
+      setGridState(s => ({ ...s, sortKeys: nextSortKeys }));
     },
-    [enableMultiSort, setTableState, sortKeys]
+    [enableMultiSort, setGridState, sortKeys]
   );
 
   const setPageSize = React.useCallback(
     (size: number) => {
-      setTableState(s => ({ ...s, pageSize: size }));
+      setGridState(s => ({ ...s, pageSize: size }));
     },
-    [setTableState]
+    [setGridState]
   );
 
   const setGlobalFilter = React.useCallback(
     (filter: string) => {
-      setTableState(s => ({ ...s, globalFilter: filter, pageIndex: 1 }));
+      setGridState(s => ({ ...s, globalFilter: filter, pageIndex: 1 }));
     },
-    [setTableState]
+    [setGridState]
   );
 
   const computedColumns = React.useMemo((): Array<IColumnInfo<T>> => {
