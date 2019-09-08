@@ -1,10 +1,10 @@
 import { renderHook, act } from "@testing-library/react-hooks";
-import { usegridState } from "../src/usegridState";
+import { useGridState } from "../src/useGridState";
 import { TestData } from "./testUtils";
 
 test("Should store basic grid data", () => {
   const { result } = renderHook(() =>
-    usegridState({
+    useGridState({
       data: TestData
     })
   );
@@ -14,7 +14,7 @@ test("Should store basic grid data", () => {
 describe("Client mode", () => {
   it("Should generate pages number accordingly", () => {
     const { result } = renderHook(() =>
-      usegridState({ data: TestData, pageSize: 5, serverMode: false })
+      useGridState({ data: TestData, pageSize: 5, serverMode: false })
     );
     expect(result.current.pageSize).toBe(5);
     expect(result.current.nbPages).toBe(20);
@@ -41,7 +41,7 @@ describe("Client mode", () => {
     ];
 
     const { result } = renderHook(() =>
-      usegridState({ data: data, serverMode: false })
+      useGridState({ data: data, serverMode: false })
     );
 
     // data not sorted
@@ -63,7 +63,7 @@ describe("Client mode", () => {
     ];
 
     const { result } = renderHook(() =>
-      usegridState({ data: data, serverMode: false, enableMultiSort: true })
+      useGridState({ data: data, serverMode: false, enableMultiSort: true })
     );
 
     // data not sorted
@@ -83,7 +83,7 @@ describe("Client mode", () => {
 describe("Server mode", () => {
   it("Should set data as expected", () => {
     const { result } = renderHook(() =>
-      usegridState({
+      useGridState({
         serverMode: true
       })
     );
