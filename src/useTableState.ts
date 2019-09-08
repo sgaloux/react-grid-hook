@@ -2,10 +2,9 @@ import * as react from "react";
 import React from "react";
 import sortBy from "lodash/fp/sortBy";
 import { AssertionError } from "assert";
-import { IColumn } from "./IColumn";
-import { IUseTableOptions } from "./IUseTableOptions";
-
-export type SortType = "NONE" | "ASC" | "DESC";
+import { IColumn } from "./interfaces/IColumn";
+import { IUseTableOptions } from "./interfaces/IUseTableOptions";
+import { SortType } from "./types/SortType";
 
 interface IColumnInfo<T> extends IColumn<T> {
   sortInfo: SortType;
@@ -94,12 +93,7 @@ export const useTableState = <T>(options?: Partial<IUseTableOptions<T>>) => {
     enablePagination
   } = tableState;
 
-  // React.useEffect(() => {
-  //   if (!enablePagination) {
-  //     setTableState(s => ({ ...s, pageSize: totalCount }));
-  //   }
-  // }, [enablePagination, totalCount]);
-
+  // Compute basic total count and page data
   React.useEffect(() => {
     if (!serverMode) {
       setTableState(s => ({ ...s, totalCount: data.length }));
@@ -126,7 +120,7 @@ export const useTableState = <T>(options?: Partial<IUseTableOptions<T>>) => {
     }
   }, [data, serverMode, sortKeys]);
 
-  // COMPUTE PAGE AND PAGE COUNT
+  // COMPUTE PAGE CONTENT AND PAGE COUNT
   React.useEffect(() => {
     if (!serverMode) {
       if (enablePagination) {

@@ -1,3 +1,5 @@
+import { SortType } from "../types/SortType";
+
 export interface IColumn<T> {
   header?: string;
   fieldName?: keyof T;
