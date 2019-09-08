@@ -9,7 +9,8 @@
     "test": "jest",
     "test:watch": "jest --watch --coverage",
     "test:cover": "jest --coverage",
-    "prepare": "npm test"
+    "prepare": "npm test",
+    "bump": "bump -a -t -c"
   },
   "repository": {
     "type": "git",
