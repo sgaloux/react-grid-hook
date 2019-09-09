@@ -243,6 +243,10 @@ export const useGridState = <T>(options?: Partial<IUseTableOptions<T>>) => {
     [sortKeys]
   );
 
+  const setColumns = React.useCallback((c: IColumn<T>[]) => {
+    setGridState(s => ({ ...s, columns: c }));
+  }, []);
+
   return {
     data,
     page,
@@ -260,6 +264,7 @@ export const useGridState = <T>(options?: Partial<IUseTableOptions<T>>) => {
     goToPreviousPage,
     setPageSize,
     setGlobalFilter,
+    setColumns,
     goToPage,
     setData,
     toggleSort,
