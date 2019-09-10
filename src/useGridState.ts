@@ -12,7 +12,6 @@ interface IColumnInfo<T> extends IColumn<T> {
 
 interface ISetDataOptions {
   totalCount: number;
-  nbPages: number;
   pageIndex: number;
 }
 
@@ -26,7 +25,9 @@ interface IUsegridState<T> extends IUseTableOptions<T> {
   };
 }
 
-export const useGridState = <T>(options?: Partial<IUseTableOptions<T>>) => {
+export const useGridState = <T extends { [key: string]: any }>(
+  options?: Partial<IUseTableOptions<T>>
+) => {
   const [gridState, setGridState] = React.useState<IUsegridState<T>>({
     ...{
       data: [],
@@ -63,6 +64,16 @@ export const useGridState = <T>(options?: Partial<IUseTableOptions<T>>) => {
     enablePagination
   } = gridState;
 
+  const filterCache = React.useMemo(() => {
+    return data.map(obj => {
+      const objectKeys = Object.keys(obj);
+      return {
+        filterText: objectKeys.map(k => (obj[k] + "").toUpperCase()).join(""),
+        item: obj
+      };
+    });
+  }, [data]);
+
   // Compute basic total count and page data
   React.useEffect(() => {
     if (!serverMode) {
@@ -72,9 +83,15 @@ export const useGridState = <T>(options?: Partial<IUseTableOptions<T>>) => {
     }
   }, [data, serverMode, setGridState]);
 
-  // COMPUTE SORT
+  // COMPUTE SORT and FILTER
   const sortedData = React.useMemo(() => {
     if (!serverMode) {
+      const filtered = globalFilter
+        ? filterCache
+            .filter(d => d.filterText.includes(globalFilter.toUpperCase()))
+            .map(d => d.item)
+        : data;
+
       const sortKeyFields = Object.keys(sortKeys).filter(
         d => sortKeys[d] !== "NONE"
       );
@@ -85,7 +102,7 @@ export const useGridState = <T>(options?: Partial<IUseTableOptions<T>>) => {
         .map(s => (s === "ASC" ? "asc" : "desc"));
 
       const sortedDataResults = lodash.orderBy(
-        data as any,
+        filtered as any,
         sortKeyFields,
         sortKeyOrderBy
       );
@@ -94,7 +111,7 @@ export const useGridState = <T>(options?: Partial<IUseTableOptions<T>>) => {
     } else {
       return data;
     }
-  }, [data, serverMode, sortKeys]);
+  }, [filterCache, serverMode, sortKeys, data, globalFilter]);
 
   // COMPUTE PAGE CONTENT AND PAGE COUNT
   React.useEffect(() => {
@@ -104,7 +121,15 @@ export const useGridState = <T>(options?: Partial<IUseTableOptions<T>>) => {
         const startIndex = (pageIndex - 1) * pageSize;
         const endIndex = startIndex + pageSize;
         const nextpage = sortedData.slice(startIndex, endIndex);
-        setGridState(s => ({ ...s, page: nextpage, nbPages: nextnbPages }));
+        setGridState(s => ({
+          ...s,
+          page: nextpage,
+          nbPages: nextnbPages,
+          pageIndex:
+            nextnbPages < s.pageIndex && nextnbPages > 0
+              ? nextnbPages
+              : s.pageIndex
+        }));
       } else {
         // Set only 1 page with the size of TotalCount
         setGridState(s => ({ ...s, page: sortedData, nbPages: 1 }));
@@ -128,6 +153,7 @@ export const useGridState = <T>(options?: Partial<IUseTableOptions<T>>) => {
 
   const goToNextPage = React.useCallback(() => {
     if (canGoNextPage) {
+      console.log("GO TO NEXT PAGE", { pageIndex });
       setGridState(s => ({ ...s, pageIndex: s.pageIndex + 1 }));
     }
   }, [canGoNextPage, setGridState]);
