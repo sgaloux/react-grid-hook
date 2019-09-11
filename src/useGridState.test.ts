@@ -26,12 +26,7 @@ describe("Client mode", () => {
       canGoNextPage,
       pageIndex
     } = result.current;
-    console.log("TEST", {
-      nbPages,
-      canGoNextPage,
-      canGoPreviousPage,
-      pageIndex
-    });
+   
     expect(result.current.canGoPreviousPage).toBeFalsy();
     expect(result.current.canGoNextPage).toBeTruthy();
     expect(result.current.pageIndex).toBe(1);
