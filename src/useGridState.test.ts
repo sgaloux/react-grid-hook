@@ -26,7 +26,7 @@ describe("Client mode", () => {
       canGoNextPage,
       pageIndex
     } = result.current;
-   
+
     expect(result.current.canGoPreviousPage).toBeFalsy();
     expect(result.current.canGoNextPage).toBeTruthy();
     expect(result.current.pageIndex).toBe(1);
@@ -124,6 +124,25 @@ describe("Client mode", () => {
     });
 
     expect(result.current.columns[0].fieldName).toBe("age");
+  });
+
+  it("Should define default sort on table creation", () => {
+    const { result } = renderHook(() =>
+      useGridState({
+        data: TestData,
+        sortKeys: {
+          name: "DESC",
+          age: "ASC"
+        },
+        serverMode: false,
+        enablePagination: false
+      })
+    );
+
+    expect(result.current.sortKeys["name"]).toBe("DESC");
+    expect(result.current.sortKeys["age"]).toBe("ASC");
+    expect(result.current.sortKeysStrings).toContain("name|d");
+    expect(result.current.sortKeysStrings).toContain("age");
   });
 
   it("should define only 1 page when pagination not enabled", () => {

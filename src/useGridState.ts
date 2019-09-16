@@ -20,9 +20,6 @@ interface IUsegridState<T> extends IUseTableOptions<T> {
   totalCount: number;
   globalFilter: string;
   page: T[];
-  sortKeys: {
-    [key: string]: SortType;
-  };
 }
 
 export const useGridState = <T extends { [key: string]: any }>(
