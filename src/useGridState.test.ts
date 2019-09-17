@@ -24,15 +24,15 @@ describe("Client mode", () => {
       nbPages,
       canGoPreviousPage,
       canGoNextPage,
-      pageIndex
+      pageNumber
     } = result.current;
 
     expect(result.current.canGoPreviousPage).toBeFalsy();
     expect(result.current.canGoNextPage).toBeTruthy();
-    expect(result.current.pageIndex).toBe(1);
+    expect(result.current.pageNumber).toBe(1);
 
     act(() => result.current.goToNextPage());
-    expect(result.current.pageIndex).toBe(2);
+    expect(result.current.pageNumber).toBe(2);
     expect(result.current.page[0]).toBe(TestData[5]);
 
     act(() => result.current.goToPreviousPage());
@@ -48,7 +48,7 @@ describe("Client mode", () => {
 
     act(() => result.current.setPageSize(10));
 
-    expect(result.current.pageIndex).toBe(10);
+    expect(result.current.pageNumber).toBe(10);
     expect(result.current.page.length).toBe(10);
   });
 
@@ -155,6 +155,26 @@ describe("Client mode", () => {
     );
 
     expect(result.current.page.length).toBe(TestData.length);
+  });
+
+  it("should set forceTake and forceSkip correctly", () => {
+    const { result } = renderHook(() =>
+      useGridState({
+        data: TestData,
+        serverMode: false,
+        enablePagination: false,
+        pageSize: 10
+      })
+    );
+
+    expect(result.current.page.length).toBe(TestData.length);
+    expect(result.current.skip).toBe(0);
+    expect(result.current.take).toBe(10);
+
+    act(() => result.current.goToPage(3));
+
+    expect(result.current.skip).toBe(20);
+    expect(result.current.take).toBe(10);
   });
 
   it("should filter the data when global filter is set", () => {

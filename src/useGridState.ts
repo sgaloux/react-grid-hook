@@ -14,7 +14,7 @@ interface ISetDataOptions {
 }
 
 interface IUsegridState<T> extends IUseTableOptions<T> {
-  pageIndex: number;
+  pageNumber: number;
   totalCount: number;
   globalFilter: string;
   page: T[];
@@ -28,7 +28,7 @@ export const useGridState = <T extends { [key: string]: any }>(
       data: [],
       columns: [],
       page: [],
-      pageIndex: 1,
+      pageNumber: 1,
       nbPages: 1,
       totalCount: 0,
       pageSize: 10,
@@ -46,7 +46,7 @@ export const useGridState = <T extends { [key: string]: any }>(
   const {
     serverMode,
     data,
-    pageIndex,
+    pageNumber,
     pageSize,
     availablePageSizes: pagesSizes,
     totalCount,
@@ -113,17 +113,17 @@ export const useGridState = <T extends { [key: string]: any }>(
     if (!serverMode) {
       if (enablePagination) {
         const nextnbPages = Math.ceil(totalCount / pageSize);
-        const startIndex = (pageIndex - 1) * pageSize;
+        const startIndex = (pageNumber - 1) * pageSize;
         const endIndex = startIndex + pageSize;
         const nextpage = sortedData.slice(startIndex, endIndex);
         setGridState(s => ({
           ...s,
           page: nextpage,
           nbPages: nextnbPages,
-          pageIndex:
-            nextnbPages < s.pageIndex && nextnbPages > 0
+          pageNumber:
+            nextnbPages < s.pageNumber && nextnbPages > 0
               ? nextnbPages
-              : s.pageIndex
+              : s.pageNumber
         }));
       } else {
         // Set only 1 page with the size of TotalCount
@@ -132,36 +132,36 @@ export const useGridState = <T extends { [key: string]: any }>(
     } else {
       setGridState(s => ({ ...s, page: sortedData }));
     }
-  }, [serverMode, sortedData, pageIndex, pageSize, totalCount, setGridState]);
+  }, [serverMode, sortedData, pageNumber, pageSize, totalCount, setGridState]);
 
   const nbPages = React.useMemo(() => Math.ceil(totalCount / pageSize), [
     pageSize,
     totalCount
   ]);
 
-  const canGoNextPage = React.useMemo(() => pageIndex < nbPages, [
-    pageIndex,
+  const canGoNextPage = React.useMemo(() => pageNumber < nbPages, [
+    pageNumber,
     nbPages
   ]);
 
-  const canGoPreviousPage = React.useMemo(() => pageIndex > 1, [pageIndex]);
+  const canGoPreviousPage = React.useMemo(() => pageNumber > 1, [pageNumber]);
 
   const goToNextPage = React.useCallback(() => {
     if (canGoNextPage) {
-      setGridState(s => ({ ...s, pageIndex: s.pageIndex + 1 }));
+      setGridState(s => ({ ...s, pageNumber: s.pageNumber + 1 }));
     }
   }, [canGoNextPage, setGridState]);
 
   const goToPreviousPage = React.useCallback(() => {
     if (canGoPreviousPage) {
-      setGridState(s => ({ ...s, pageIndex: s.pageIndex - 1 }));
+      setGridState(s => ({ ...s, pageNumber: s.pageNumber - 1 }));
     }
   }, [canGoPreviousPage, setGridState]);
 
   const goToPage = React.useCallback(
     (pgIndex: number) => {
       if (pgIndex > 0 && pgIndex <= nbPages) {
-        setGridState(s => ({ ...s, pageIndex: pgIndex }));
+        setGridState(s => ({ ...s, pageNumber: pgIndex }));
       }
     },
     [nbPages, setGridState]
@@ -181,9 +181,9 @@ export const useGridState = <T extends { [key: string]: any }>(
     [setGridState]
   );
 
-  const [forceTake, forceSkip] = React.useMemo(
-    () => [pageSize, pageSize * pageIndex - 1],
-    [pageIndex, pageSize]
+  const [take, skip] = React.useMemo(
+    () => [pageSize, pageSize * (pageNumber - 1)],
+    [pageNumber, pageSize]
   );
 
   const toggleSort = React.useCallback(
@@ -223,7 +223,7 @@ export const useGridState = <T extends { [key: string]: any }>(
 
   const setGlobalFilter = React.useCallback(
     (filter: string) => {
-      setGridState(s => ({ ...s, globalFilter: filter, pageIndex: 1 }));
+      setGridState(s => ({ ...s, globalFilter: filter, pageNumber: 1 }));
     },
     [setGridState]
   );
@@ -269,7 +269,7 @@ export const useGridState = <T extends { [key: string]: any }>(
   return {
     data,
     page,
-    pageIndex,
+    pageNumber,
     pageSize,
     availablePageSizes: pagesSizes!,
     nbPages,
@@ -287,8 +287,8 @@ export const useGridState = <T extends { [key: string]: any }>(
     goToPage,
     setData,
     toggleSort,
-    forceTake,
-    forceSkip,
+    take,
+    skip,
     pageNumbers,
     globalFilter,
     enableFilter,
