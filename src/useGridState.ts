@@ -3,7 +3,6 @@ import * as lodash from "lodash";
 import { IColumn } from "./interfaces/IColumn";
 import { IUseTableOptions } from "./interfaces/IUseTableOptions";
 import { SortType } from "./types/SortType";
-import { object } from "prop-types";
 
 interface IColumnInfo<T> extends IColumn<T> {
   sortInfo: SortType;
@@ -12,7 +11,6 @@ interface IColumnInfo<T> extends IColumn<T> {
 
 interface ISetDataOptions {
   totalCount: number;
-  pageIndex: number;
 }
 
 interface IUsegridState<T> extends IUseTableOptions<T> {
@@ -150,7 +148,6 @@ export const useGridState = <T extends { [key: string]: any }>(
 
   const goToNextPage = React.useCallback(() => {
     if (canGoNextPage) {
-      console.log("GO TO NEXT PAGE", { pageIndex });
       setGridState(s => ({ ...s, pageIndex: s.pageIndex + 1 }));
     }
   }, [canGoNextPage, setGridState]);
@@ -177,7 +174,6 @@ export const useGridState = <T extends { [key: string]: any }>(
         nextState.data = nextData;
         if (dataOptions) {
           nextState.totalCount = dataOptions.totalCount;
-          nextState.pageIndex = dataOptions.pageIndex;
         }
         return nextState;
       });
