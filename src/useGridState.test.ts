@@ -201,7 +201,7 @@ describe("Server mode", () => {
     expect(result.current.page.length).toBe(0);
 
     act(() => {
-      result.current.setData(TestData, { totalCount: 500, pageIndex: 2 });
+      result.current.setData(TestData, { totalCount: 500 });
     });
 
     expect(result.current.page.length).toBe(100);
