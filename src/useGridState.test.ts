@@ -91,11 +91,7 @@ describe("Client mode", () => {
         data: data,
         serverMode: false,
         enableMultiSort: true,
-        columns: [
-          {
-            fieldName: "name"
-          }
-        ]
+        columns: ["name"]
       })
     );
 
@@ -120,7 +116,7 @@ describe("Client mode", () => {
     expect(result.current.columns[0].sortInfo).toBe("DESC");
 
     act(() => {
-      result.current.setColumns([{ fieldName: "age" }]);
+      result.current.setColumns(["age"]);
     });
 
     expect(result.current.columns[0].fieldName).toBe("age");

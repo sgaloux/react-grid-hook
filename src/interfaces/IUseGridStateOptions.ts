@@ -1,9 +1,8 @@
-import { IColumn } from "./IColumn";
 import { SortType } from "../types/SortType";
 
-export interface IUseTableOptions<T> {
+export interface IUseGridStateOptions<T> {
   data: T[];
-  columns: Array<IColumn<T>>;
+  columns: Array<keyof T>;
   pageSize: number;
   availablePageSizes?: number[];
   sortKeys: {

@@ -1,10 +1,10 @@
 import * as React from "react";
 import * as lodash from "lodash";
-import { IColumn } from "./interfaces/IColumn";
-import { IUseTableOptions } from "./interfaces/IUseTableOptions";
+import { IUseGridStateOptions } from "./interfaces/IUseGridStateOptions";
 import { SortType } from "./types/SortType";
 
-interface IColumnInfo<T> extends IColumn<T> {
+interface IColumnInfo<T> {
+  fieldName: keyof T;
   sortInfo: SortType;
   toggleSort: () => void;
 }
@@ -13,7 +13,7 @@ interface ISetDataOptions {
   totalCount: number;
 }
 
-interface IUsegridState<T> extends IUseTableOptions<T> {
+interface IUsegridState<T> extends IUseGridStateOptions<T> {
   pageNumber: number;
   totalCount: number;
   globalFilter: string;
@@ -21,7 +21,7 @@ interface IUsegridState<T> extends IUseTableOptions<T> {
 }
 
 export const useGridState = <T extends { [key: string]: any }>(
-  options?: Partial<IUseTableOptions<T>>
+  options?: Partial<IUseGridStateOptions<T>>
 ) => {
   const [gridState, setGridState] = React.useState<IUsegridState<T>>({
     ...{
@@ -231,14 +231,14 @@ export const useGridState = <T extends { [key: string]: any }>(
   const computedColumns = React.useMemo((): Array<IColumnInfo<T>> => {
     return columns.map(c => {
       let sortInfo: SortType = "NONE";
-      if (c.fieldName) {
-        sortInfo = sortKeys[c.fieldName as string] || "NONE";
+      if (c) {
+        sortInfo = sortKeys[c as string] || "NONE";
       }
       return {
-        ...c,
+        fieldName: c,
         sortInfo,
         toggleSort: () => {
-          toggleSort(c.fieldName as string);
+          toggleSort(c as string);
         }
       };
     });
@@ -262,7 +262,7 @@ export const useGridState = <T extends { [key: string]: any }>(
     [sortKeys]
   );
 
-  const setColumns = React.useCallback((c: IColumn<T>[]) => {
+  const setColumns = React.useCallback((c: Array<keyof T>) => {
     setGridState(s => ({ ...s, columns: c }));
   }, []);
 
